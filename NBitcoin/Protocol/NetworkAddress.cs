@@ -1,8 +1,8 @@
-﻿#if !NOSOCKET
+﻿#if !NOobject
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,13 +14,13 @@ namespace NBitcoin.Protocol
 		{
 
 		}
-		public NetworkAddress(IPEndPoint endpoint)
+		public NetworkAddress(object endpoint)
 		{
 			Endpoint = endpoint;
 		}
-		public NetworkAddress(IPAddress address, int port)
+		public NetworkAddress(object address, int port)
 		{
-			Endpoint = new IPEndPoint(address, port);
+			
 		}
 
 		internal uint ntime;
@@ -59,30 +59,15 @@ namespace NBitcoin.Protocol
 				ntime = nNow - 5 * 24 * 60 * 60;
 		}
 
-		public IPEndPoint Endpoint
+		public object Endpoint
 		{
 			get
 			{
-				return new IPEndPoint(new IPAddress(ip), port);
+				return null;
 			}
 			set
 			{
-				port = (ushort)value.Port;
-				var ipBytes = value.Address.GetAddressBytes();
-				if (ipBytes.Length == 16)
-				{
-					ip = ipBytes;
-				}
-				else if (ipBytes.Length == 4)
-				{
-					//Convert to ipv4 mapped to ipv6
-					//In these addresses, the first 80 bits are zero, the next 16 bits are one, and the remaining 32 bits are the IPv4 address
-					ip = new byte[16];
-					Array.Copy(ipBytes, 0, ip, 12, 4);
-					Array.Copy(new byte[] { 0xFF, 0xFF }, 0, ip, 10, 2);
-				}
-				else
-					throw new NotSupportedException("Invalid IP address type");
+				
 			}
 		}
 

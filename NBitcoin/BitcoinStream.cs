@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 #if !NOSOCKET
-using System.Net.Sockets;
+
 #endif
 using System.Reflection;
 using System.Text;
@@ -104,7 +104,7 @@ namespace NBitcoin
 		{
 			_Serializing = serializing;
 #if !NOSOCKET
-			_IsNetworkStream = inner is NetworkStream;
+			_IsNetworkStream = false;
 #endif
 			_Inner = inner;
 		}

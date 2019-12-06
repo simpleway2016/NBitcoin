@@ -1,9 +1,9 @@
-﻿#if !NOSOCKET
+﻿#if !NOobject
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,8 +41,8 @@ namespace NBitcoin.Protocol
 		event EventHandler<NodeEventArgs> Added;
 		event EventHandler<NodeEventArgs> Removed;
 
-		Node FindByEndpoint(IPEndPoint endpoint);
-		Node FindByIp(IPAddress ip);
+		Node FindByEndpoint(object endpoint);
+		Node FindByIp(object ip);
 		Node FindLocal();
 	}
 
@@ -132,36 +132,24 @@ namespace NBitcoin.Protocol
 
 		public Node FindLocal()
 		{
-			return FindByIp(IPAddress.Loopback);
+			return null;
 		}
 
-		public Node FindByIp(IPAddress ip)
+		public Node FindByIp(object ip)
 		{
-			ip = ip.EnsureIPv6();
-			return _Nodes.Where(n => Match(ip, null, n.Key)).Select(s => s.Key).FirstOrDefault();
+			return null;
 		}
 
 
 
-		public Node FindByEndpoint(IPEndPoint endpoint)
+		public Node FindByEndpoint(object endpoint)
 		{
-			var ip = endpoint.Address.EnsureIPv6();
-			int port = endpoint.Port;
-			return _Nodes.Select(n => n.Key).FirstOrDefault(n => Match(ip, port, n));
+			return null;
 		}
 
-		private static bool Match(IPAddress ip, int? port, Node n)
+		private static bool Match(object ip, int? port, Node n)
 		{
-			if (port.HasValue)
-			{
-				return (n.State > NodeState.Disconnecting && n.RemoteSocketAddress.Equals(ip) && n.RemoteSocketPort == port.Value) ||
-						(n.PeerVersion.AddressFrom.Address.Equals(ip) && n.PeerVersion.AddressFrom.Port == port.Value);
-			}
-			else
-			{
-				return (n.State > NodeState.Disconnecting && n.RemoteSocketAddress.Equals(ip)) ||
-						n.PeerVersion.AddressFrom.Address.Equals(ip);
-			}
+			return false;
 		}
 
 

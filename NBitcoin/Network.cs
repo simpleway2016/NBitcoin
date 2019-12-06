@@ -1,10 +1,10 @@
-#nullable enable
+
 using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+
 using System.Threading;
 using NBitcoin.DataEncoders;
 using NBitcoin.Protocol;
@@ -37,10 +37,9 @@ namespace NBitcoin
 			this.host = host;
 		}
 #if !NOSOCKET
-		public Task<IPEndPoint[]> GetAddressNodesAsync(int port)
+		public Task<object[]> GetAddressNodesAsync(int port)
 		{
-			var dns = new DnsEndPoint(Host, port);
-			return dns.ResolveToIPEndpointsAsync();
+			return null;
 		}
 #endif
 		public override string ToString()
@@ -2181,7 +2180,7 @@ namespace NBitcoin
 				// Seed nodes are given a random 'last seen time' of between one and two
 				// weeks ago.
 				addr.Time = DateTime.UtcNow - (TimeSpan.FromSeconds(rand.NextDouble() * nOneWeek.TotalSeconds)) - nOneWeek;
-				addr.Endpoint = new IPEndPoint(new IPAddress(pnSeed6_main[i].Item1), pnSeed6_main[i].Item2);
+				
 				vFixedSeeds.Add(addr);
 			}
 #endif
@@ -2257,7 +2256,7 @@ namespace NBitcoin
 				// Seed nodes are given a random 'last seen time' of between one and two
 				// weeks ago.
 				addr.Time = DateTime.UtcNow - (TimeSpan.FromSeconds(rand.NextDouble() * nOneWeek.TotalSeconds)) - nOneWeek;
-				addr.Endpoint = new IPEndPoint(new IPAddress(pnSeed6_test[i].Item1), pnSeed6_test[i].Item2);
+				
 				vFixedSeeds.Add(addr);
 			}
 #endif
@@ -2425,7 +2424,8 @@ namespace NBitcoin
 		{
 			if (str == null)
 				throw new ArgumentNullException(nameof(str));
-			targetType ??= typeof(IBitcoinString);
+			if(targetType == null)
+				targetType  = typeof(IBitcoinString);
 			if (NetworkStringParser.TryParse(str, this, targetType, out var o))
 				return o;
 			var base58Encoder = NetworkStringParser.GetBase58CheckEncoder();
@@ -2817,4 +2817,3 @@ namespace NBitcoin
 		}
 	}
 }
-#nullable disable

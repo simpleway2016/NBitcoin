@@ -1,8 +1,8 @@
-﻿#if !NOSOCKET
+﻿#if !NOobject
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+
 using System.Text;
 
 namespace NBitcoin.Protocol.Behaviors
@@ -13,16 +13,16 @@ namespace NBitcoin.Protocol.Behaviors
 		{
 
 		}
-		public SocksSettingsBehavior(EndPoint socksEndpoint)
+		public SocksSettingsBehavior(object socksEndpoint)
 		{
 			SocksEndpoint = socksEndpoint;
 		}
-		public SocksSettingsBehavior(EndPoint socksEndpoint, bool onlyForOnionHosts)
+		public SocksSettingsBehavior(object socksEndpoint, bool onlyForOnionHosts)
 		{
 			SocksEndpoint = socksEndpoint;
 			OnlyForOnionHosts = onlyForOnionHosts;
 		}
-		public SocksSettingsBehavior(EndPoint socksEndpoint, bool onlyForOnionHosts, NetworkCredential networkCredential, bool streamIsolation)
+		public SocksSettingsBehavior(object socksEndpoint, bool onlyForOnionHosts, object networkCredential, bool streamIsolation)
 		{
 			SocksEndpoint = socksEndpoint;
 			OnlyForOnionHosts = onlyForOnionHosts;
@@ -32,7 +32,7 @@ namespace NBitcoin.Protocol.Behaviors
 		/// <summary>
 		/// If the socks endpoint to connect to
 		/// </summary>
-		public EndPoint SocksEndpoint { get; set; }
+		public object SocksEndpoint { get; set; }
 		/// <summary>
 		/// If the socks proxy is only used for Tor traffic (default: true)
 		/// </summary>
@@ -42,25 +42,22 @@ namespace NBitcoin.Protocol.Behaviors
 		/// <summary>
 		/// Credentials to connect to the SOCKS proxy (Use StreamIsolation instead of you want Tor isolation)
 		/// </summary>
-		public NetworkCredential NetworkCredential { get; set; }
+		public object NetworkCredential { get; set; }
 
 		/// <summary>
 		/// Randomize the NetworkCredentials to the Socks proxy
 		/// </summary>
 		public bool StreamIsolation { get; set; }
 
-		internal NetworkCredential GetCredentials()
+		internal object GetCredentials()
 		{
 			return NetworkCredential ??
 				(StreamIsolation ? GenerateCredentials() : null);
 		}
 
-		private NetworkCredential GenerateCredentials()
+		private object GenerateCredentials()
 		{
-			const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-			var identity = new string(Enumerable.Repeat(chars, 21)
-			.Select(s => s[(int)(RandomUtils.GetUInt32() % s.Length)]).ToArray());
-			return new NetworkCredential(identity, identity);
+			return null;
 		}
 
 		public override object Clone()

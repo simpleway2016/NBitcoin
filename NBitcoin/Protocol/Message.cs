@@ -5,8 +5,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-#if !NOSOCKET
-using System.Net.Sockets;
+#if !NOobject
+
 #endif
 using System.Text;
 using System.Threading;
@@ -162,22 +162,22 @@ namespace NBitcoin.Protocol
 			return String.Format("{0} : {1}", Command, Payload);
 		}
 
-#if !NOSOCKET
-		public static Message ReadNext(Socket socket, Network network, uint version, CancellationToken cancellationToken)
+#if !NOobject
+		public static Message ReadNext(object ip, Network network, uint version, CancellationToken cancellationToken)
 		{
 			PerformanceCounter counter;
-			return ReadNext(socket, network, version, cancellationToken, out counter);
+			return ReadNext(ip, network, version, cancellationToken, out counter);
 		}
 
-		public static Message ReadNext(Socket socket, Network network, uint version, CancellationToken cancellationToken, out PerformanceCounter counter)
+		public static Message ReadNext(object ip, Network network, uint version, CancellationToken cancellationToken, out PerformanceCounter counter)
 		{
-			return ReadNext(socket, network, version, cancellationToken, out counter);
+			return ReadNext(ip, network, version, cancellationToken, out counter);
 		}
 		[Obsolete("The buffer parameter is now ignored")]
-		public static Message ReadNext(Socket socket, Network network, uint version, CancellationToken cancellationToken, byte[] buffer, out PerformanceCounter counter)
+		public static Message ReadNext(object ip, Network network, uint version, CancellationToken cancellationToken, byte[] buffer, out PerformanceCounter counter)
 		{
-			var stream = new NetworkStream(socket, false);
-			return ReadNext(stream, network, version, cancellationToken, out counter);
+			counter = null;
+			return null;
 		}
 #endif
 		public static Message ReadNext(Stream stream, Network network, uint version, CancellationToken cancellationToken)

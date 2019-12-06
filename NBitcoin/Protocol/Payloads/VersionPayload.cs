@@ -1,9 +1,9 @@
-﻿#if !NOSOCKET
+﻿#if !NOobject
 using NBitcoin.DataEncoders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
@@ -116,7 +116,7 @@ namespace NBitcoin.Protocol
 		}
 
 		NetworkAddress addr_recv = new NetworkAddress();
-		public IPEndPoint AddressReceiver
+		public object AddressReceiver
 		{
 			get
 			{
@@ -128,7 +128,7 @@ namespace NBitcoin.Protocol
 			}
 		}
 		NetworkAddress addr_from = new NetworkAddress();
-		public IPEndPoint AddressFrom
+		public object AddressFrom
 		{
 			get
 			{

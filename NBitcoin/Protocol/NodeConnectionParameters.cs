@@ -1,10 +1,10 @@
-﻿#if !NOSOCKET
+﻿#if !NOobject
 using NBitcoin.Protocol.Behaviors;
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
+
 using System.Linq;
-using System.Net;
+
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +23,8 @@ namespace NBitcoin.Protocol
 			Services = NodeServices.Nothing;
 			ConnectCancellation = default(CancellationToken);
 			// Use max supported by MAC OSX Yosemite/Mavericks/Sierra (https://fasterdata.es.net/host-tuning/osx/)
-			this.SocketSettings.ReceiveBufferSize = 1048576;
-			this.SocketSettings.SendBufferSize = 1048576;
+			this.objectSettings.ReceiveBufferSize = 1048576;
+			this.objectSettings.SendBufferSize = 1048576;
 			////////////////////////
 			UserAgent = VersionPayload.GetNBitcoinUserAgent();
 			PreferredTransactionOptions = TransactionOptions.All;
@@ -42,7 +42,7 @@ namespace NBitcoin.Protocol
 			Advertize = other.Advertize;
 			PreferredTransactionOptions = other.PreferredTransactionOptions;
 			EndpointConnector = other.EndpointConnector.Clone();
-			SocketSettings = other.SocketSettings.Clone();
+			objectSettings = other.objectSettings.Clone();
 			foreach (var behavior in other.TemplateBehaviors)
 			{
 				TemplateBehaviors.Add(behavior.Clone());
@@ -90,33 +90,33 @@ namespace NBitcoin.Protocol
 			get;
 			set;
 		}
-		[Obsolete("Use SocketSettings.ReceiveBufferSize instead")]
+		[Obsolete("Use objectSettings.ReceiveBufferSize instead")]
 		public int ReceiveBufferSize
 		{
 			get
 			{
-				return SocketSettings.ReceiveBufferSize is int v ? v : 1048576;
+				return objectSettings.ReceiveBufferSize is int v ? v : 1048576;
 			}
 			set
 			{
-				SocketSettings.ReceiveBufferSize = value;
+				objectSettings.ReceiveBufferSize = value;
 			}
 		}
 
-		[Obsolete("Use SocketSettings.SendBufferSize instead")]
+		[Obsolete("Use objectSettings.SendBufferSize instead")]
 		public int SendBufferSize
 		{
 			get
 			{
-				return SocketSettings.SendBufferSize is int v ? v : 1048576;
+				return objectSettings.SendBufferSize is int v ? v : 1048576;
 			}
 			set
 			{
-				SocketSettings.SendBufferSize = value;
+				objectSettings.SendBufferSize = value;
 			}
 		}
 
-		public SocketSettings SocketSettings { get; set; } = new SocketSettings();
+		public objectSettings objectSettings { get; set; } = new objectSettings();
 
 		public IEnpointConnector EndpointConnector { get; set; } = new DefaultEndpointConnector();
 
@@ -149,7 +149,7 @@ namespace NBitcoin.Protocol
 			return new NodeConnectionParameters(this);
 		}
 
-		public IPEndPoint AddressFrom
+		public object AddressFrom
 		{
 			get;
 			set;
@@ -161,20 +161,9 @@ namespace NBitcoin.Protocol
 			set;
 		}
 
-		public VersionPayload CreateVersion(IPEndPoint peer, Network network)
+		public VersionPayload CreateVersion(object peer, Network network)
 		{
-			VersionPayload version = new VersionPayload()
-			{
-				Nonce = Nonce == null ? RandomUtils.GetUInt64() : Nonce.Value,
-				UserAgent = UserAgent,
-				Version = Version == null ? network.MaxP2PVersion : Version.Value,
-				Timestamp = DateTimeOffset.UtcNow,
-				AddressReceiver = peer,
-				AddressFrom = AddressFrom ?? new IPEndPoint(IPAddress.Parse("0.0.0.0").MapToIPv6Ex(), network.DefaultPort),
-				Relay = IsRelay,
-				Services = Services
-			};
-			return version;
+			return null;
 		}
 	}
 }

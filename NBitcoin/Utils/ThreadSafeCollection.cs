@@ -1,4 +1,4 @@
-﻿#if !NOSOCKET
+﻿#if !NOobject
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

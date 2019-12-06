@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
+
 using System.Text;
 using System.Threading.Tasks;
 using NBitcoin.Protocol;
@@ -203,66 +203,25 @@ namespace NBitcoin.RPC
 
 		public async Task<byte[]> SendRequestAsync(string resource, RestResponseFormat format, params string[] parms)
 		{
-			var request = BuildHttpRequest(resource, format, parms);
-			using (var response = await GetWebResponse(request).ConfigureAwait(false))
-			{
-				var stream = response.GetResponseStream();
-				var bytesToRead = (int)response.ContentLength;
-				var buffer = await stream.ReadBytesAsync(bytesToRead).ConfigureAwait(false);
-				return buffer;
-			}
+			return null;
 		}
 
 		#region Private methods
-		private WebRequest BuildHttpRequest(string resource, RestResponseFormat format, params string[] parms)
+		private object BuildHttpRequest(string resource, RestResponseFormat format, params string[] parms)
 		{
-			var hasParams = parms != null && parms.Length > 0;
-			var uriBuilder = new UriBuilder(_address);
-			uriBuilder.Path = "rest/" + resource + (hasParams ? "/" : "") + string.Join("/", parms) + "." + format.ToString().ToLowerInvariant();
-
-			var request = WebRequest.CreateHttp(uriBuilder.Uri);
-			request.Method = "GET";
-#if !NETSTANDARD1X
-			request.KeepAlive = false;
-#endif
-			return request;
+			return null;
 		}
 
-		private static async Task<WebResponse> GetWebResponse(WebRequest request)
+		private static async Task<object> GetWebResponse(object request)
 		{
-			WebResponse response = null;
-			WebException exception = null;
-			try
-			{
-				response = await request.GetResponseAsync().ConfigureAwait(false);
-			}
-			catch (WebException ex)
-			{
-				// "WebException status: {0}", ex.Status);
-
-				// Even if the request "failed" we need to continue reading the response from the router
-				response = ex.Response as HttpWebResponse;
-
-				if (response == null)
-					throw;
-				exception = ex;
-			}
-			if (exception != null)
-			{
-				var stream = response.GetResponseStream();
-				var bytesToRead = (int)response.ContentLength;
-				var buffer = await stream.ReadBytesAsync(bytesToRead).ConfigureAwait(false);
-				response.Dispose();
-				throw new RestApiException(Encoding.UTF8.GetString(buffer, 0, buffer.Length - 2), exception);
-			}
-			return response;
+			return null;
 		}
 		#endregion
 	}
 
 	public class RestApiException : Exception
 	{
-		public RestApiException(string message, WebException inner)
+		public RestApiException(string message, Exception inner)
 			: base(message, inner)
 		{
 		}

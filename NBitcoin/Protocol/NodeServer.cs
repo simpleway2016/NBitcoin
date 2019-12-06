@@ -4,8 +4,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
+
+
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -49,21 +49,7 @@ namespace NBitcoin.Protocol
 		public NodeServer(Network network, uint? version = null,
 			int internalPort = -1)
 		{
-			AllowLocalPeers = true;
-			InboundNodeConnectionParameters = new NodeConnectionParameters();
-			internalPort = internalPort == -1 ? network.DefaultPort : internalPort;
-			_LocalEndpoint = new IPEndPoint(IPAddress.Parse("0.0.0.0").MapToIPv6Ex(), internalPort);
-			MaxConnections = 125;
-			_Network = network;
-			_ExternalEndpoint = new IPEndPoint(_LocalEndpoint.Address, Network.DefaultPort);
-			_Version = version == null ? network.MaxP2PVersion : version.Value;
-			var listener = new EventLoopMessageListener<IncomingMessage>(ProcessMessage);
-			_MessageProducer.AddMessageListener(listener);
-			OwnResource(listener);
-			_ConnectedNodes = new NodesCollection();
-			_ConnectedNodes.Added += _Nodes_NodeAdded;
-			_ConnectedNodes.Removed += _Nodes_NodeRemoved;
-			_ConnectedNodes.MessageProducer.AddMessageListener(listener);
+			
 		}
 
 
@@ -98,8 +84,8 @@ namespace NBitcoin.Protocol
 		}
 
 
-		private IPEndPoint _LocalEndpoint;
-		public IPEndPoint LocalEndpoint
+		private object _LocalEndpoint;
+		public object LocalEndpoint
 		{
 			get
 			{
@@ -111,7 +97,7 @@ namespace NBitcoin.Protocol
 			}
 		}
 
-		Socket socket;
+		object socket;
 
 		public bool IsListening
 		{
@@ -123,116 +109,15 @@ namespace NBitcoin.Protocol
 
 		public void Listen(int maxIncoming = 8)
 		{
-			if (socket != null)
-				throw new InvalidOperationException("Already listening");
-
-
-			using (Logs.NodeServer.BeginScope("Node server listening on {listeningOn}", LocalEndpoint))
-
-			{
-				try
-				{
-					socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-					socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-
-					socket.Bind(LocalEndpoint);
-					socket.Listen(maxIncoming);
-					Logs.NodeServer.LogInformation("Listening...");
-					BeginAccept();
-				}
-				catch (Exception ex)
-				{
-					Logs.NodeServer.LogError(default, ex, "Error while opening the Protocol server");
-					throw;
-				}
-			}
+			
 		}
 
 		private void BeginAccept()
 		{
-			if (_Cancel.IsCancellationRequested)
-			{
-				Logs.NodeServer.LogInformation("Stop accepting connection...");
-				return;
-			}
-			Logs.NodeServer.LogInformation("Accepting connection...");
-			var args = new SocketAsyncEventArgs();
-			args.Completed += Accept_Completed;
-			if (!socket.AcceptAsync(args))
-				EndAccept(args);
+			
 		}
 
-		private void Accept_Completed(object sender, SocketAsyncEventArgs e)
-		{
-			EndAccept(e);
-		}
-
-		private void EndAccept(SocketAsyncEventArgs args)
-		{
-			Socket client = null;
-			try
-			{
-				if (args.SocketError != SocketError.Success)
-					throw new SocketException((int)args.SocketError);
-				client = args.AcceptSocket;
-				if (_Cancel.IsCancellationRequested)
-					return;
-				Logs.NodeServer.LogInformation("Client connection accepted {remoteEndPoint}", client.RemoteEndPoint);
-				using (var cancel = CancellationTokenSource.CreateLinkedTokenSource(_Cancel.Token))
-				{
-					cancel.CancelAfter(TimeSpan.FromSeconds(10));
-
-					var stream = new NetworkStream(client, false);
-					while (true)
-					{
-						if (ConnectedNodes.Count >= MaxConnections)
-						{
-							Logs.NodeServer.LogInformation("MaxConnections limit reached");
-							Utils.SafeCloseSocket(client);
-							break;
-						}
-						cancel.Token.ThrowIfCancellationRequested();
-						PerformanceCounter counter;
-						var message = Message.ReadNext(stream, Network, Version, cancel.Token, out counter);
-						_MessageProducer.PushMessage(new IncomingMessage()
-						{
-							Socket = client,
-							Message = message,
-							Length = counter.ReadenBytes,
-							Node = null,
-						});
-						if (message.Payload is VersionPayload)
-							break;
-						else
-							Logs.NodeServer.LogError("The first message of the remote peer did not contained a Version payload");
-					}
-				}
-			}
-			catch (OperationCanceledException)
-			{
-				Utils.SafeCloseSocket(client);
-				if (!_Cancel.Token.IsCancellationRequested)
-				{
-					Logs.NodeServer.LogError("The remote connecting failed to send a message within 10 seconds, dropping connection");
-				}
-			}
-			catch (Exception ex)
-			{
-				if (_Cancel.IsCancellationRequested)
-					return;
-				if (client == null)
-				{
-					Logs.NodeServer.LogError(default, ex, "Error while accepting connection");
-					Thread.Sleep(3000);
-				}
-				else
-				{
-					Utils.SafeCloseSocket(client);
-					Logs.NodeServer.LogError(default, ex, "Invalid message received from the remote connecting node");
-				}
-			}
-			BeginAccept();
-		}
+	
 
 		internal readonly MessageProducer<IncomingMessage> _MessageProducer = new MessageProducer<IncomingMessage>();
 		internal readonly MessageProducer<object> _InternalMessageProducer = new MessageProducer<object>();
@@ -246,8 +131,8 @@ namespace NBitcoin.Protocol
 			}
 		}
 
-		volatile IPEndPoint _ExternalEndpoint;
-		public IPEndPoint ExternalEndpoint
+		volatile object _ExternalEndpoint;
+		public object ExternalEndpoint
 		{
 			get
 			{
@@ -260,13 +145,9 @@ namespace NBitcoin.Protocol
 		}
 
 
-		internal void ExternalAddressDetected(IPAddress iPAddress)
+		internal void ExternalAddressDetected(object iPAddress)
 		{
-			if (!ExternalEndpoint.Address.IsRoutable(AllowLocalPeers) && iPAddress.IsRoutable(AllowLocalPeers))
-			{
-				Logs.NodeServer.LogInformation("New externalAddress detected {externalAddress}", iPAddress);
-				ExternalEndpoint = new IPEndPoint(iPAddress, ExternalEndpoint.Port);
-			}
+			
 		}
 
 		void ProcessMessage(IncomingMessage message)
@@ -281,66 +162,7 @@ namespace NBitcoin.Protocol
 
 		private void ProcessMessageCore(IncomingMessage message)
 		{
-			if (message.Message.Payload is VersionPayload)
-			{
-				var version = message.AssertPayload<VersionPayload>();
-				var connectedToSelf = version.Nonce == Nonce;
-				if (message.Node != null && connectedToSelf)
-				{
-					Logs.NodeServer.LogWarning("Connection to self detected, abort connection");
-					message.Node.DisconnectAsync();
-					return;
-				}
-
-				if (message.Node == null)
-				{
-					var remoteEndpoint = version.AddressFrom;
-					if (!remoteEndpoint.Address.IsRoutable(AllowLocalPeers))
-					{
-						//Send his own endpoint
-						remoteEndpoint = new IPEndPoint(((IPEndPoint)message.Socket.RemoteEndPoint).Address, Network.DefaultPort);
-					}
-
-					var peer = new NetworkAddress()
-					{
-						Endpoint = remoteEndpoint,
-						Time = DateTimeOffset.UtcNow
-					};
-					var node = new Node(peer, Network, CreateNodeConnectionParameters(), message.Socket, version);
-
-					if (connectedToSelf)
-					{
-						node.SendMessage(CreateNodeConnectionParameters().CreateVersion(node.Peer.Endpoint, Network));
-						Logs.NodeServer.LogWarning("Connection to self detected, abort connection");
-						node.Disconnect();
-						return;
-					}
-
-					CancellationTokenSource cancel = new CancellationTokenSource();
-					cancel.CancelAfter(TimeSpan.FromSeconds(10.0));
-					try
-					{
-						ConnectedNodes.Add(node);
-						node.StateChanged += node_StateChanged;
-						node.RespondToHandShake(cancel.Token);
-					}
-					catch (OperationCanceledException ex)
-					{
-						Logs.NodeServer.LogError(default, ex, "The remote node did not respond fast enough (10 seconds) to the handshake completion, dropping connection");
-						node.DisconnectAsync();
-						throw;
-					}
-					catch (Exception)
-					{
-						node.DisconnectAsync();
-						throw;
-					}
-				}
-			}
-
-			var messageReceived = MessageReceived;
-			if (messageReceived != null)
-				messageReceived(this, message);
+			
 		}
 
 		void node_StateChanged(Node node, NodeState oldState)
@@ -443,27 +265,14 @@ namespace NBitcoin.Protocol
 
 
 
-		public bool IsConnectedTo(IPEndPoint endpoint)
+		public bool IsConnectedTo(object endpoint)
 		{
-			return _ConnectedNodes.FindByEndpoint(endpoint) != null;
+			return false;
 		}
 
-		public Node FindOrConnect(IPEndPoint endpoint)
+		public Node FindOrConnect(object endpoint)
 		{
-			while (true)
-			{
-				var node = _ConnectedNodes.FindByEndpoint(endpoint);
-				if (node != null)
-					return node;
-				node = Node.Connect(Network, endpoint, CreateNodeConnectionParameters());
-				node.StateChanged += node_StateChanged;
-				if (!_ConnectedNodes.Add(node))
-				{
-					node.DisconnectAsync();
-				}
-				else
-					return node;
-			}
+			return null;
 		}
 	}
 }

@@ -1,8 +1,8 @@
-﻿#if !NOSOCKET
+﻿#if !NOobject
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+
 using System.Text;
 using System.Threading.Tasks;
 
@@ -150,7 +150,7 @@ namespace NBitcoin.Protocol.Behaviors
 				var addr = message.Message.Payload as AddrPayload;
 				if (addr != null)
 				{
-					AddressManager.Add(addr.Addresses, node.RemoteSocketAddress);
+					AddressManager.Add(addr.Addresses, node.RemoteobjectAddress);
 				}
 			}
 		}

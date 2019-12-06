@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+
 #if !NOHTTPCLIENT
-using System.Net.Http;
+
 #endif
 using System.Text;
 using System.Text.RegularExpressions;

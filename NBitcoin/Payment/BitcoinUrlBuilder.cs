@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+
 #if !NOHTTPCLIENT
-using System.Net.Http;
-using System.Net.Http.Headers;
+
+
 #endif
 using System.Text;
 using System.Threading.Tasks;
@@ -112,38 +112,9 @@ namespace NBitcoin.Payment
 			return GetPaymentRequestAsync().GetAwaiter().GetResult();
 		}
 		[Obsolete("BIP70 is obsolete")]
-		public async Task<PaymentRequest> GetPaymentRequestAsync(HttpClient httpClient = null)
+		public async Task<PaymentRequest> GetPaymentRequestAsync(object httpClient = null)
 		{
-			if (PaymentRequestUrl == null)
-				throw new InvalidOperationException("No PaymentRequestUrl specified");
-
-			bool own = false;
-			if (httpClient == null)
-			{
-				httpClient = new HttpClient();
-				own = true;
-			}
-			try
-			{
-				HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, PaymentRequestUrl);
-				req.Headers.Clear();
-				req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(PaymentRequest.MediaType));
-
-				var result = await httpClient.SendAsync(req).ConfigureAwait(false);
-				if (!result.IsSuccessStatusCode)
-					throw new WebException(result.StatusCode + "(" + (int)result.StatusCode + ")");
-				if (result.Content.Headers.ContentType == null || !result.Content.Headers.ContentType.MediaType.Equals(PaymentRequest.MediaType, StringComparison.OrdinalIgnoreCase))
-				{
-					throw new WebException("Invalid contenttype received, expecting " + PaymentRequest.MediaType + ", but got " + result.Content.Headers.ContentType);
-				}
-				var stream = await result.Content.ReadAsStreamAsync().ConfigureAwait(false);
-				return PaymentRequest.Load(stream);
-			}
-			finally
-			{
-				if (own)
-					httpClient.Dispose();
-			}
+			return null;
 		}
 #endif
 		[Obsolete("BIP70 is obsolete")]

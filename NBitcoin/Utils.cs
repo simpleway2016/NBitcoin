@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+
 using System.Text;
 using System.Threading;
 using NBitcoin.Protocol;
@@ -11,10 +11,10 @@ using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using NBitcoin.BouncyCastle.Math;
 #if !NOSOCKET
-using System.Net.Sockets;
+
 #endif
 #if WINDOWS_UWP
-using System.Net.Sockets;
+
 using Windows.Networking;
 using Windows.Networking.Connectivity;
 #endif
@@ -284,7 +284,7 @@ namespace NBitcoin
 
 				//Big performance problem with BeginRead for other stream types than NetworkStream.
 				//Only take the slow path if cancellation is possible.
-				if (stream is NetworkStream && cancellation.CanBeCanceled)
+				if (false)
 				{
 					var ar = stream.BeginRead(buffer, offset + totalReadCount, count - totalReadCount, null, null);
 					if (!ar.CompletedSynchronously)
@@ -540,47 +540,20 @@ namespace NBitcoin
 		}
 
 #if !NOSOCKET
-		internal static IPAddress MapToIPv6(IPAddress address)
+		internal static object MapToIPv6(object address)
 		{
-			if (address.AddressFamily == AddressFamily.InterNetworkV6)
-				return address;
-			if (address.AddressFamily != AddressFamily.InterNetwork)
-				throw new Exception("Only AddressFamily.InterNetworkV4 can be converted to IPv6");
-
-			byte[] ipv4Bytes = address.GetAddressBytes();
-			byte[] ipv6Bytes = new byte[16] {
-			 0,0, 0,0, 0,0, 0,0, 0,0, 0xFF,0xFF,
-			 ipv4Bytes [0], ipv4Bytes [1], ipv4Bytes [2], ipv4Bytes [3]
-			 };
-			return new IPAddress(ipv6Bytes);
+			return null;
 
 		}
-		internal static IPAddress MapToIPv4(IPAddress address)
+		internal static object MapToIPv4(object address)
 		{
-			if (address.AddressFamily == AddressFamily.InterNetwork)
-				return address;
-			if (address.AddressFamily != AddressFamily.InterNetworkV6)
-				throw new Exception("Only AddressFamily.InterNetworkV6 can be converted to IPv4");
-			if (!address.IsIPv4MappedToIPv6Ex())
-				throw new Exception("This is not a mapped IPv4");
-			byte[] ipv6Bytes = address.GetAddressBytes();
-			return new IPAddress(new[] { ipv6Bytes[12], ipv6Bytes[13], ipv6Bytes[14], ipv6Bytes[15] });
+			return null;
 
 		}
 
-		internal static bool IsIPv4MappedToIPv6(IPAddress address)
+		internal static bool IsIPv4MappedToIPv6(object address)
 		{
-			if (address.AddressFamily != AddressFamily.InterNetworkV6)
-				return false;
-
-			byte[] bytes = address.GetAddressBytes();
-
-			for (int i = 0; i < 10; i++)
-			{
-				if (bytes[0] != 0)
-					return false;
-			}
-			return bytes[10] == 0xFF && bytes[11] == 0xFF;
+			return false;
 		}
 
 #endif
@@ -737,29 +710,14 @@ namespace NBitcoin
 
 
 #if !NOSOCKET
-		internal static void SafeCloseSocket(System.Net.Sockets.Socket socket)
+		internal static void SafeCloseSocket(object socket)
 		{
-			try
-			{
-				socket.Shutdown(SocketShutdown.Both);
-			}
-			catch
-			{
-			}
-			try
-			{
-				socket.Dispose();
-			}
-			catch
-			{
-			}
+			
 		}
 
-		public static System.Net.IPEndPoint EnsureIPv6(System.Net.IPEndPoint endpoint)
+		public static object EnsureIPv6(object endpoint)
 		{
-			if (endpoint.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
-				return endpoint;
-			return new IPEndPoint(endpoint.Address.MapToIPv6Ex(), endpoint.Port);
+			return null;
 		}
 #endif
 		public static byte[] ToBytes(uint value, bool littleEndian)
@@ -914,7 +872,7 @@ namespace NBitcoin
 
 #if !NOSOCKET
 
-		public static bool TryParseEndpoint(string hostPort, int defaultPort, out EndPoint endpoint)
+		public static bool TryParseEndpoint(string hostPort, int defaultPort, out object endpoint)
 		{
 			if (hostPort == null)
 				throw new ArgumentNullException(nameof(hostPort));
@@ -945,22 +903,11 @@ namespace NBitcoin
 					port = (ushort)defaultPort;
 				}
 			}
-			if (IPAddress.TryParse(host, out var address))
-			{
-				endpoint = new IPEndPoint(address, port);
-			}
-			else
-			{
-				if (Uri.CheckHostName(host) != UriHostNameType.Dns ||
-					// An host name with a length higher than 255 can't be resolved by DNS
-					host.Length > 255)
-					return false;
-				endpoint = new DnsEndPoint(host, port);
-			}
+			
 			return true;
 		}
 
-		public static EndPoint ParseEndpoint(string hostPort, int defaultPort)
+		public static object ParseEndpoint(string hostPort, int defaultPort)
 		{
 			if (!TryParseEndpoint(hostPort, defaultPort, out var endpoint))
 				throw new FormatException("Invalid IP or DNS endpoint");
@@ -968,58 +915,13 @@ namespace NBitcoin
 		}
 
 		[Obsolete("Use TryParseEndpoint or ParseEndpoint instead")]
-		public static IPEndPoint ParseIpEndpoint(string endpoint, int defaultPort)
+		public static object Parseobject(string endpoint, int defaultPort)
 		{
-			return ParseIpEndpoint(endpoint, defaultPort, true);
+			return Parseobject(endpoint, defaultPort, true);
 		}
-		public static IPEndPoint ParseIpEndpoint(string endpoint, int defaultPort, bool useDNS)
+		public static object Parseobject(string endpoint, int defaultPort, bool useDNS)
 		{
-			var splitted = endpoint.Trim().Split(new[] { ':' });
-			string ip = null;
-			int port = 0;
-			if (splitted.Length == 1)
-			{
-				ip = splitted[0];
-				port = defaultPort;
-			}
-			else if (splitted.Length == 2)
-			{
-				ip = splitted[0];
-				port = int.Parse(splitted[1]);
-			}
-			else
-			{
-				if ((endpoint.IndexOf(']') != -1) &&
-					int.TryParse(splitted.Last(), out port))
-				{
-					ip = String.Join(":", splitted.Take(splitted.Length - 1).ToArray());
-				}
-				else
-				{
-					ip = endpoint;
-					port = defaultPort;
-				}
-			}
-
-			IPAddress address = null;
-			try
-			{
-				address = IPAddress.Parse(ip);
-			}
-			catch (FormatException) when (useDNS)
-			{
-#if !(WINDOWS_UWP || NETSTANDARD1X)
-				address = Dns.GetHostEntry(ip).AddressList[0];
-#else
-				string adr = DnsLookup(ip).GetAwaiter().GetResult();
-				// if not resolved behave like GetHostEntry
-				if (adr == string.Empty)
-					throw new SocketException(11001);
-				else
-					address = IPAddress.Parse(adr);
-#endif
-			}
-			return new IPEndPoint(address, port);
+			return null;
 		}
 
 #if NETSTANDARD1X
@@ -1029,7 +931,7 @@ namespace NBitcoin
 
 			if (data != null && data.AddressList.Count() > 0)
 			{
-				foreach (IPAddress adr in data.AddressList)
+				foreach (object adr in data.AddressList)
 				{
 					if (adr != null && adr.IsIPv4() == true)
 					{

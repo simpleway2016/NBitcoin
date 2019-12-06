@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
+
 using System.Text;
 using System.Threading.Tasks;
 
@@ -66,17 +66,7 @@ namespace NBitcoin
 
 		public async Task<Transaction> GetAsync(uint256 txId)
 		{
-			using (HttpClient client = new HttpClient())
-			{
-				var tx = await client.GetAsync(BaseUri.AbsoluteUri + "transactions/" + txId + "?format=raw").ConfigureAwait(false);
-				if (tx.StatusCode == System.Net.HttpStatusCode.NotFound)
-					return null;
-				tx.EnsureSuccessStatusCode();
-				var bytes = await tx.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-				var txx = _Network.Consensus.ConsensusFactory.CreateTransaction();
-				txx.ReadWrite(bytes, _Network);
-				return txx;
-			}
+			throw new NotImplementedException();
 		}
 
 		public Task PutAsync(uint256 txId, Transaction tx)

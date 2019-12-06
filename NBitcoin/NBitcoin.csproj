@@ -12,7 +12,7 @@
 		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
 	<PropertyGroup>
-		<Version Condition=" '$(Version)' == '' ">5.0.7</Version>
+		<Version Condition=" '$(Version)' == '' ">5.0.6</Version>
 		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>
 	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -20,8 +20,8 @@
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 	</PropertyGroup>
 	<PropertyGroup>
-    <TargetFrameworks>net461;net452;netstandard1.3;netstandard1.1;netcoreapp2.1;netstandard2.1;netstandard2.0</TargetFrameworks>
-		<TargetFrameworks Condition="'$(BuildingInsideVisualStudio)' == 'true'">netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<TargetFrameworks Condition="'$(BuildingInsideVisualStudio)' == 'true'">netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(TargetFrameworkOverride)' != ''">$(TargetFrameworkOverride)</TargetFrameworks>
 		<NoWarn>1591;1573;1572;1584;1570;3021</NoWarn>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -37,12 +37,10 @@
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'net452' ">
 		<DefineConstants>$(DefineConstants);NO_RCA;CLASSICDOTNET;LEGACY_X509;NO_ARRAY_FILL</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' Or '$(TargetFramework)' == 'netstandard2.1' Or '$(TargetFramework)' == 'netstandard2.0' ">
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
 		<DefineConstants>$(DefineConstants);NOCUSTOMSSLVALIDATION</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' Or '$(TargetFramework)' == 'netstandard2.1'">
-		<DefineConstants>$(DefineConstants);NETCORE;HAS_SPAN</DefineConstants>
-	</PropertyGroup>
+
 	<PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
 		<DefineConstants>$(DefineConstants);NETSTANDARD;NO_ARRAY_FILL</DefineConstants>
 	</PropertyGroup>
@@ -57,21 +55,8 @@
 		<PackageReference Include="System.Buffers" Version="4.5.0" Condition="'$(TargetFramework)' != 'netstandard2.1' And '$(TargetFramework)' != 'netcoreapp2.1'" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.0.0" />
 	</ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'netstandard1.1' ">
-    <PackageReference Include="System.Net.Requests" Version="4.3.0" />
-  </ItemGroup>
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
-		<Reference Include="System.Net.Http" />
-	</ItemGroup>
-	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-		<PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
-		<PackageReference Include="System.Globalization.Extensions" Version="4.3.0" />
-		<PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
-		<PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-		<PackageReference Include="System.Threading.Thread" Version="4.3.0" />
-		<PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-		<PackageReference Include="System.Security.Cryptography.Csp" Version="4.3.0" />
-	</ItemGroup>
+
+	
 	<ItemGroup Condition=" '$(Configuration)' == 'Release' ">
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
 	</ItemGroup>
@@ -97,5 +82,7 @@
 
 	<PropertyGroup>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\NBitcoin.xml</DocumentationFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>Jack.NBitcoin.NoNetwork</PackageId>
 	</PropertyGroup>
 </Project>
